@@ -45,6 +45,64 @@ class Pipe {
 	control(dirY) {
 		this.moveY = dirY;
 	}
+
+	detectTouch() {
+		
+	}
+}
+
+class Ball {
+	constructor() {
+		this.size = 30;
+
+		this.pos = {
+			x: width / 2 - this.size / 2,
+			y: height / 2 - this.size / 2
+		}
+
+		{
+			let a = () => [1, -1][round(random(0, 1))]
+
+			this.dir = { // rand
+				x: a(),
+				y: a()
+			}
+		}
+		this.speed = 5; // ?rand
+	}
+
+	render() {
+		noStroke();
+		fill(255);
+		ellipse(
+			this.pos.x,
+			this.pos.y,
+			this.size,
+			this.size
+		);
+
+		return this;
+	}
+
+	update() {
+		this.pos.x += this.dir.x * this.speed;
+		this.pos.y += this.dir.y * this.speed;
+
+		if(
+			this.pos.y + this.size >= height ||
+			this.pos.y < 0
+		) this.signal('y');
+	}
+
+	signal(dir = null) { // makes *-1 dir
+		if(dir === 'x') {
+			this.dir.x *= -1;
+		} else if(dir === 'y') {
+			this.dir.y *= -1;
+		} else {
+			throw new Error("Invalid argument.");
+		}
+	}
 }
 
 function setup() {
@@ -53,13 +111,15 @@ function setup() {
 	let pipeMargin = 15;
 	rightPipe = new Pipe(pipeMargin, 'l');
 	leftPipe = new Pipe(width - pipeMargin, 'r');
+	ball = new Ball();
 }
 
 function draw() {
 	background(0);
 
-	leftPipe.render().update();
-	rightPipe.render().update();
+	leftPipe.render().update().detectTouch();
+	rightPipe.render().update().detectTouch();
+	ball.render().update();
 }
 
 function keyPressed() {
