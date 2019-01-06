@@ -122,8 +122,8 @@ class Ball {
 		this.pos.y += this.dir.y * this.speed;
 
 		if(
-			this.pos.y + this.size >= height ||
-			this.pos.y < 0
+			this.pos.y + this.size / 2 >= height ||
+			this.pos.y - this.size / 2 < 0
 		) this.signal('y');
 
 		{
