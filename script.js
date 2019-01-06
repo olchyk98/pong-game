@@ -4,7 +4,11 @@
 // bottom arrow - right pipe, move bottom
 
 //// - ////
-let leftPipe = rightPipe = ball = null;
+let leftPipe = rightPipe = ball = null,
+	score = {
+		left: 0,
+		right: 0
+	}
 
 class Pipe {
 	constructor(xpos, label) {
@@ -75,20 +79,27 @@ class Ball {
 	constructor() {
 		this.size = 30;
 
+		this.startFramesDF = 35;
+
+		this.pos = this.dir = this.startFrames = null;
+		this.spawn();
+
+		this.speed = 5;
+	}
+
+	spawn() {
 		this.pos = {
 			x: width / 2 - this.size / 2,
 			y: height / 2 - this.size / 2
 		}
 
-		{
-			let a = () => [1, -1][round(random(0, 1))]
-
-			this.dir = { // rand
-				x: a(),
-				y: a()
-			}
+		let a = () => [1, -1][round(random(0, 1))]
+		this.dir = {
+			x: a(),
+			y: a()
 		}
-		this.speed = 5; // ?rand
+
+		this.startFrames = this.startFramesDF;
 	}
 
 	render() {
@@ -105,6 +116,8 @@ class Ball {
 	}
 
 	update() {
+		if(this.startFrames && --this.startFrames > 0) return;
+
 		this.pos.x += this.dir.x * this.speed;
 		this.pos.y += this.dir.y * this.speed;
 
@@ -112,6 +125,21 @@ class Ball {
 			this.pos.y + this.size >= height ||
 			this.pos.y < 0
 		) this.signal('y');
+
+		{
+			let a = false; // out
+
+			if(this.pos.x + this.size > width) {
+				score.left++;
+				a = true;
+			}
+			else if(this.pos.x < 0) {
+				score.right++;
+				a = true;
+			}
+
+			if(a) this.spawn();
+		}
 	}
 
 	signal(dir = null, addY) { // makes *-1 dir
@@ -138,6 +166,25 @@ function setup() {
 function draw() {
 	background(0);
 
+	{
+		let a = 45, // fontSize
+			b = 255, // color
+			c = 65; // top margin
+
+		// Draw score -> Left score
+		textAlign(LEFT);
+		textSize(a);
+		fill(b);
+		text(score.left, width / 3, c);
+
+		// Draw score -> Right score
+		textAlign(RIGHT);
+		textSize(a);
+		fill(b);
+		text(score.right, width - width / 3, c);
+	}
+
+	// Draw objects
 	leftPipe.render().update().detectTouch();
 	rightPipe.render().update().detectTouch();
 	ball.render().update();
