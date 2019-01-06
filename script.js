@@ -16,6 +16,8 @@ class Pipe {
 			y: height / 2 - this.height / 2
 		}
 
+		this.label = label;
+
 		this.moveY = 0;
 		this.speed = 15;
 	}
@@ -40,6 +42,8 @@ class Pipe {
 			a + this.height <= height &&
 			a > 0
 		) this.pos.y = a;
+
+		return this;
 	}
 
 	control(dirY) {
@@ -47,7 +51,23 @@ class Pipe {
 	}
 
 	detectTouch() {
-		
+		if(!ball) throw new Error("The game was initialized incorrectly.");
+
+		if(
+			(
+				(this.label === 'r' && ball.pos.x > this.pos.x && ball.pos.x < this.pos.x + this.width) ||
+				(this.label === 'l' && ball.pos.x < this.pos.x + this.width && ball.pos.x > this.pos.x)
+			) &&
+			(
+				ball.pos.y + ball.size > this.pos.y && ball.pos.y < this.pos.y + this.height
+			)
+		) {
+			if(ball.pos.y <= this.pos.y + this.height / 2) {
+				ball.signal(null, -1);
+			} else {
+				ball.signal(null, 1);
+			}
+		}
 	}
 }
 
@@ -94,13 +114,14 @@ class Ball {
 		) this.signal('y');
 	}
 
-	signal(dir = null) { // makes *-1 dir
+	signal(dir = null, addY) { // makes *-1 dir
 		if(dir === 'x') {
 			this.dir.x *= -1;
 		} else if(dir === 'y') {
 			this.dir.y *= -1;
 		} else {
-			throw new Error("Invalid argument.");
+			this.dir.x *= -1;
+			this.dir.y *= addY;
 		}
 	}
 }
@@ -109,8 +130,8 @@ function setup() {
 	createCanvas(innerWidth - .5, innerHeight - .5);
 
 	let pipeMargin = 15;
-	rightPipe = new Pipe(pipeMargin, 'l');
-	leftPipe = new Pipe(width - pipeMargin, 'r');
+	leftPipe = new Pipe(pipeMargin, 'l');
+	rightPipe = new Pipe(width - pipeMargin, 'r');
 	ball = new Ball();
 }
 
